@@ -14,13 +14,17 @@ export interface Task {
     status: TaskStatus;
     order: number;
     userId: number;
+    project?: {
+        id: number;
+        name: string;
+    };
 }
 
 interface TaskState {
     tasks: Task[];
     isLoading: boolean;
-    fetchTasks: () => Promise<void>;
-    createTask: (title: string, description?: string, status?: TaskStatus) => Promise<void>;
+    fetchTasks: (projectId?: number | null) => Promise<void>;
+    createTask: (title: string, description?: string, status?: TaskStatus, projectId?: number) => Promise<void>;
     updateTask: (id: number, data: Partial<Task>) => Promise<void>;
     deleteTask: (id: number) => Promise<void>;
     setTasks: (tasks: Task[]) => void;
@@ -29,10 +33,11 @@ interface TaskState {
 export const useTaskStore = create<TaskState>((set, get) => ({
     tasks: [],
     isLoading: false,
-    fetchTasks: async () => {
+    fetchTasks: async (projectId?: number | null) => {
         set({ isLoading: true });
         try {
-            const response = await api.get('/tasks');
+            const params = projectId ? { projectId } : {};
+            const response = await api.get('/tasks', { params });
             set({ tasks: response.data });
         } catch (error) {
             console.error('Error fetching tasks:', error);
@@ -40,9 +45,9 @@ export const useTaskStore = create<TaskState>((set, get) => ({
             set({ isLoading: false });
         }
     },
-    createTask: async (title, description, status) => {
+    createTask: async (title, description, status, projectId) => {
         try {
-            const response = await api.post('/tasks', { title, description, status });
+            const response = await api.post('/tasks', { title, description, status, projectId });
             set((state) => ({ tasks: [...state.tasks, response.data] }));
         } catch (error) {
             console.error('Error creating task:', error);

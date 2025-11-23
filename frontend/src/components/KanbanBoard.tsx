@@ -11,12 +11,15 @@ const columns = [
     { id: TaskStatus.DONE, title: "Completado" },
 ];
 
+import { useProjectStore } from "@/store/projects";
+
 export default function KanbanBoard() {
-    const { tasks, fetchTasks, updateTask, setTasks } = useTaskStore();
+    const { tasks, fetchTasks, updateTask, setTasks, isLoading } = useTaskStore();
+    const { selectedProjectId } = useProjectStore();
 
     useEffect(() => {
-        fetchTasks();
-    }, [fetchTasks]);
+        fetchTasks(selectedProjectId);
+    }, [fetchTasks, selectedProjectId]);
 
     const onDragEnd = (result: DropResult) => {
         const { destination, source, draggableId } = result;
@@ -44,6 +47,14 @@ export default function KanbanBoard() {
         }
     };
 
+    if (isLoading) {
+        return (
+            <div className="flex h-full items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
     return (
         <DragDropContext onDragEnd={onDragEnd}>
             <div className="flex flex-col md:flex-row gap-6 h-full overflow-x-auto pb-4">
@@ -61,7 +72,7 @@ export default function KanbanBoard() {
                                 <div
                                     {...provided.droppableProps}
                                     ref={provided.innerRef}
-                                    className={`bg-muted/50 rounded-lg p-4 min-h-[500px] transition-colors ${snapshot.isDraggingOver ? "bg-muted/80" : ""
+                                    className={`bg-muted/50 rounded-lg p-4 min-h-[430px] transition-colors ${snapshot.isDraggingOver ? "bg-muted/80" : ""
                                         }`}
                                 >
                                     {tasks

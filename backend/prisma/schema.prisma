@@ -15,6 +15,18 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   tasks     Task[]
+  projects  Project[]
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  tasks       Task[]
 }
 
 enum TaskStatus {
@@ -33,4 +45,6 @@ model Task {
   updatedAt   DateTime   @updatedAt
   userId      Int
   user        User       @relation(fields: [userId], references: [id])
+  projectId   Int?
+  project     Project?   @relation(fields: [projectId], references: [id])
 }

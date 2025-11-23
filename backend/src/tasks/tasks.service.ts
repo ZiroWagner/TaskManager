@@ -8,11 +8,16 @@ export class TasksService {
     constructor(private prisma: PrismaService) { }
 
     async create(userId: number, createTaskDto: CreateTaskDto) {
-        const status = createTaskDto.status || 'TODO'; // Default explícito
+        const status = createTaskDto.status || 'TODO';
+        const projectId = createTaskDto.projectId;
 
-        // Obtener el último orden para la columna específica
+        // Obtener el último orden para la columna específica y proyecto
         const lastTask = await this.prisma.task.findFirst({
-            where: { userId, status: status as any },
+            where: {
+                userId,
+                status: status as any,
+                projectId: projectId || null,
+            },
             orderBy: { order: 'desc' },
         });
         const newOrder = lastTask ? lastTask.order + 1 : 0;
@@ -27,9 +32,13 @@ export class TasksService {
         });
     }
 
-    async findAll(userId: number) {
+    async findAll(userId: number, projectId?: number) {
         return this.prisma.task.findMany({
-            where: { userId },
+            where: {
+                userId,
+                ...(projectId !== undefined ? { projectId } : {}),
+            },
+            include: { project: true },
             orderBy: { order: 'asc' },
         });
     }

@@ -16,12 +16,15 @@ import { useTaskStore } from "@/store/tasks";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
+import { useProjectStore } from "@/store/projects";
+
 export default function AiTaskCreator() {
     const [isOpen, setIsOpen] = useState(false);
     const [prompt, setPrompt] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isPlanMode, setIsPlanMode] = useState(false);
     const { createTask } = useTaskStore();
+    const { selectedProjectId } = useProjectStore();
 
     const handleGenerate = async () => {
         if (!prompt.trim()) return;
@@ -33,12 +36,12 @@ export default function AiTaskCreator() {
                 const tasks = response.data;
                 // Crear tareas secuencialmente para mantener orden (o Promise.all si el orden lo maneja el backend)
                 for (const task of tasks) {
-                    await createTask(task.title, task.description);
+                    await createTask(task.title, task.description, undefined, selectedProjectId || undefined);
                 }
             } else {
                 const response = await api.post("/ai/generate", { prompt });
                 const { title, description } = response.data;
-                await createTask(title, description);
+                await createTask(title, description, undefined, selectedProjectId || undefined);
             }
 
             setIsOpen(false);

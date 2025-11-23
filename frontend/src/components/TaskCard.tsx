@@ -115,11 +115,18 @@ export default function TaskCard({ task, index }: TaskCardProps) {
                                 )}
 
                                 {/* ESTADO — SIEMPRE ABAJO Y VISIBLE */}
-                                <Badge className={`${getStatusColor(task.status)} text-white border-none mt-3`}>
-                                    {task.status === TaskStatus.TODO && "Por Hacer"}
-                                    {task.status === TaskStatus.IN_PROGRESS && "En Progreso"}
-                                    {task.status === TaskStatus.DONE && "Completado"}
-                                </Badge>
+                                <div className="mt-3 flex items-center gap-2">
+                                    <Badge className={`${getStatusColor(task.status)} text-white border-none`}>
+                                        {task.status === TaskStatus.TODO && "Por Hacer"}
+                                        {task.status === TaskStatus.IN_PROGRESS && "En Progreso"}
+                                        {task.status === TaskStatus.DONE && "Completado"}
+                                    </Badge>
+                                    {task.project && (
+                                        <Badge variant="outline" className="text-xs">
+                                            {task.project.name}
+                                        </Badge>
+                                    )}
+                                </div>
                             </CardHeader>
                         </Card>
 
