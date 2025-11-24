@@ -57,7 +57,7 @@ export default function AiTaskCreator() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button variant="secondary" className="gap-2">
+                <Button variant="secondary" className="gap-2 cursor-pointer">
                     <Sparkles className="h-4 w-4 text-purple-500" />
                     Asistente IA
                 </Button>

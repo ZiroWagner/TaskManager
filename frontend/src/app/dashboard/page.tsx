@@ -73,7 +73,7 @@ export default function DashboardPage() {
                                     <AiTaskCreator />
                                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                                         <DialogTrigger asChild>
-                                            <Button>
+                                            <Button className="cursor-pointer">
                                                 <Plus className="mr-2 h-4 w-4" /> Nueva Tarea
                                             </Button>
                                         </DialogTrigger>
@@ -93,13 +93,13 @@ export default function DashboardPage() {
                                                     <Label htmlFor="description">Descripción</Label>
                                                     <Input id="description" {...register("description")} />
                                                 </div>
-                                                <Button type="submit" className="w-full">Crear</Button>
+                                                <Button type="submit" className="w-full cursor-pointer">Crear</Button>
                                             </form>
                                         </DialogContent>
                                     </Dialog>
                                 </>
                             )}
-                            <Button variant="outline" onClick={onLogout}>
+                            <Button variant="outline" onClick={onLogout} className="cursor-pointer">
                                 <LogOut className="mr-2 h-4 w-4" /> Salir
                             </Button>
                         </div>

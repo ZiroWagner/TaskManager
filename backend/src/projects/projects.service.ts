@@ -3,9 +3,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 
+import { UploadsService } from '../uploads/uploads.service';
+
 @Injectable()
 export class ProjectsService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private uploadsService: UploadsService,
+    ) { }
 
     async create(userId: number, createProjectDto: CreateProjectDto) {
         return this.prisma.project.create({
@@ -45,7 +50,13 @@ export class ProjectsService {
     }
 
     async remove(id: number, userId: number) {
-        await this.findOne(id, userId); // Verify existence and ownership
+        const project = await this.findOne(id, userId); // Verify existence and ownership
+
+        // Delete project folder: attachments/{userId}/{projectName}
+        await this.uploadsService.deleteFolder([
+            userId.toString(),
+            project.name
+        ]);
 
         return this.prisma.project.delete({
             where: { id },

@@ -7,6 +7,13 @@ export enum TaskStatus {
     DONE = 'DONE',
 }
 
+export interface Attachment {
+    id: number;
+    url: string;
+    filename: string;
+    type: string;
+}
+
 export interface Task {
     id: number;
     title: string;
@@ -18,6 +25,7 @@ export interface Task {
         id: number;
         name: string;
     };
+    attachments?: Attachment[];
 }
 
 interface TaskState {
@@ -28,6 +36,8 @@ interface TaskState {
     updateTask: (id: number, data: Partial<Task>) => Promise<void>;
     deleteTask: (id: number) => Promise<void>;
     setTasks: (tasks: Task[]) => void;
+    uploadAttachment: (taskId: number, file: File) => Promise<void>;
+    deleteAttachment: (taskId: number, attachmentId: number) => Promise<void>;
 }
 
 export const useTaskStore = create<TaskState>((set, get) => ({
@@ -78,4 +88,39 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         }
     },
     setTasks: (tasks) => set({ tasks }),
+    uploadAttachment: async (taskId: number, file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+            const response = await api.post(`/tasks/${taskId}/attachments`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            // Update task with new attachment
+            set((state) => ({
+                tasks: state.tasks.map((t) =>
+                    t.id === taskId
+                        ? { ...t, attachments: [...(t.attachments || []), response.data] }
+                        : t
+                ),
+            }));
+        } catch (error) {
+            console.error('Error uploading attachment:', error);
+            throw error;
+        }
+    },
+    deleteAttachment: async (taskId: number, attachmentId: number) => {
+        try {
+            await api.delete(`/tasks/${taskId}/attachments/${attachmentId}`);
+            set((state) => ({
+                tasks: state.tasks.map((t) =>
+                    t.id === taskId
+                        ? { ...t, attachments: t.attachments?.filter((a) => a.id !== attachmentId) }
+                        : t
+                ),
+            }));
+        } catch (error) {
+            console.error('Error deleting attachment:', error);
+            throw error;
+        }
+    },
 }));

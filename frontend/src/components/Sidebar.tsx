@@ -21,11 +21,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ModeToggle } from "@/components/mode-toggle";
+import UserProfileDialog from "@/components/UserProfileDialog";
+import { useAuthStore } from "@/store/auth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { User } from "lucide-react";
 
 export default function Sidebar() {
     const { projects, fetchProjects, createProject, updateProject, deleteProject, selectProject, selectedProjectId } = useProjectStore();
+    const { user } = useAuthStore();
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [newProjectName, setNewProjectName] = useState("");
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
 
     // Estados para Edición
     const [isEditOpen, setIsEditOpen] = useState(false);
@@ -74,8 +80,35 @@ export default function Sidebar() {
         setProjectToDelete(null);
     };
 
+    const getInitials = (name: string) => {
+        return name
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .toUpperCase()
+            .slice(0, 2);
+    };
+
+    const storageUrl = "http://localhost:8081";
+    const avatarSrc = user?.avatarUrl ? `${storageUrl}${user.avatarUrl}` : undefined;
+
     return (
         <div className="fixed left-0 top-0 h-screen w-64 border-r flex flex-col bg-muted/10">
+            <div className="p-4 border-b flex items-center gap-3 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setIsProfileOpen(true)}>
+                <Avatar className="h-9 w-9">
+                    <AvatarImage src={avatarSrc} />
+                    <AvatarFallback>
+                        {user?.name ? getInitials(user.name) : <User className="h-4 w-4" />}
+                    </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col overflow-hidden">
+                    <span className="text-sm font-medium truncate">{user?.name || "Usuario"}</span>
+                    <span className="text-xs text-muted-foreground truncate">{user?.email}</span>
+                </div>
+            </div>
+
+            <UserProfileDialog open={isProfileOpen} onOpenChange={setIsProfileOpen} />
+
             <div className="p-4 border-b">
                 <h2 className="font-semibold text-lg flex items-center gap-2">
                     <FolderOpen className="h-5 w-5" />

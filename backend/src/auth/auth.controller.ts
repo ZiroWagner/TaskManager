@@ -5,10 +5,15 @@ import { RegisterDto } from './dto/register.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
+import { UsersService } from '../users/users.service';
+
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) { }
+    constructor(
+        private authService: AuthService,
+        private usersService: UsersService,
+    ) { }
 
     @Post('login')
     @ApiOperation({ summary: 'Iniciar sesión' })
@@ -30,7 +35,12 @@ export class AuthController {
     @ApiBearerAuth()
     @Get('profile')
     @ApiOperation({ summary: 'Obtener perfil del usuario autenticado' })
-    getProfile(@Request() req) {
-        return req.user;
+    async getProfile(@Request() req) {
+        const user = await this.usersService.findOne(req.user.email);
+        if (user) {
+            const { password, ...result } = user;
+            return result;
+        }
+        return null;
     }
 }

@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
+import TaskDetailDialog from "./TaskDetailDialog";
 
 interface TaskCardProps {
     task: Task;
@@ -43,6 +44,7 @@ const getStatusColor = (status: TaskStatus) => {
 export default function TaskCard({ task, index }: TaskCardProps) {
     const { deleteTask, updateTask } = useTaskStore();
     const [isEditOpen, setIsEditOpen] = useState(false);
+    const [isDetailOpen, setIsDetailOpen] = useState(false);
     const { register, handleSubmit } = useForm<{ title: string; description: string }>({
         defaultValues: {
             title: task.title,
@@ -55,8 +57,6 @@ export default function TaskCard({ task, index }: TaskCardProps) {
         setIsEditOpen(false);
     };
 
-    const [isOpen, setIsOpen] = useState(false);
-
     return (
         <>
             <Draggable draggableId={task.id.toString()} index={index}>
@@ -68,7 +68,7 @@ export default function TaskCard({ task, index }: TaskCardProps) {
                         className="mb-3"
                     >
                         <Card
-                            onClick={() => setIsOpen(!isOpen)}
+                            onClick={() => setIsDetailOpen(true)}
                             className="cursor-pointer hover:shadow-md transition-all group relative"
                         >
                             {/* CABECERA + DESCRIPCIÓN TRUNCADA + ESTADO (SIEMPRE VISIBLES) */}
@@ -106,10 +106,7 @@ export default function TaskCard({ task, index }: TaskCardProps) {
 
                                 {/* DESCRIPCIÓN TRUNCADA SI COMPACTO */}
                                 {task.description && (
-                                    <p
-                                        className={`text-xs text-muted-foreground mt-2 whitespace-pre-wrap transition-all ${isOpen ? "line-clamp-none" : "line-clamp-2"
-                                            }`}
-                                    >
+                                    <p className="text-xs text-muted-foreground mt-2 whitespace-pre-wrap line-clamp-2">
                                         {task.description}
                                     </p>
                                 )}
@@ -126,6 +123,11 @@ export default function TaskCard({ task, index }: TaskCardProps) {
                                             {task.project.name}
                                         </Badge>
                                     )}
+                                    {task.attachments && task.attachments.length > 0 && (
+                                        <Badge variant="secondary" className="text-xs">
+                                            📎 {task.attachments.length}
+                                        </Badge>
+                                    )}
                                 </div>
                             </CardHeader>
                         </Card>
@@ -133,6 +135,12 @@ export default function TaskCard({ task, index }: TaskCardProps) {
                     </div>
                 )}
             </Draggable>
+
+            <TaskDetailDialog
+                task={task}
+                open={isDetailOpen}
+                onOpenChange={setIsDetailOpen}
+            />
 
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
                 <DialogContent>

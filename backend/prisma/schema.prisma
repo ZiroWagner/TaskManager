@@ -16,6 +16,7 @@ model User {
   updatedAt DateTime @updatedAt
   tasks     Task[]
   projects  Project[]
+  avatarUrl String?
 }
 
 model Project {
@@ -36,15 +37,26 @@ enum TaskStatus {
 }
 
 model Task {
-  id          Int        @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   title       String
   description String?
-  status      TaskStatus @default(TODO)
-  order       Int        @default(0)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  status      TaskStatus   @default(TODO)
+  order       Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   userId      Int
-  user        User       @relation(fields: [userId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
   projectId   Int?
-  project     Project?   @relation(fields: [projectId], references: [id])
+  project     Project?     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  attachments Attachment[]
+}
+
+model Attachment {
+  id        Int      @id @default(autoincrement())
+  url       String
+  filename  String
+  type      String   // "IMAGE" | "FILE"
+  createdAt DateTime @default(now())
+  taskId    Int
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
 }
